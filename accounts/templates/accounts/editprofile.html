@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <form action="" method="post" class="col-md-3">
+        {% csrf_token %}
+        {{ form }}
+        <br>
+        <input type="submit" value="Edit">
+    </form>
+{% endblock %}

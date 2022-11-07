@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if request.user == post.user %}
+        <a class="btn btn-danger" href="{% url 'posts:post_delete' post.id post.slug %}">DELETE</a>
+        <a class="btn btn-info" href="{% url 'posts:post_update' post.id post.slug %}">UPDATE</a>
+    {% endif %}
+    <h2>{{ post.title }}</h2><br>
+    <a href="{% url 'accounts:user_profile' post.user.id post.user.username %}" class="nav-link active">Auther: {{ post.user.username }}</a>
+    <p>Created: {{ post.created }}</p>
+    <p>{{ post.body }}</p><hr/>
+    {% if request.user.is_authenticated %}
+        {% if is_liked %}
+            <a href="{% url 'posts:unlike_post' post.id %}" class="btn btn-primary">Like {{ post.likescount }}</a>
+            {% else %}
+            <a href="{% url 'posts:like_post' post.id %}" class="btn btn-primary">Like {{ post.likescount }}</a>
+            {% endif %}
+            <br><br>
+        <p>Please register your comment</p>
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ commentform.as_p }}
+            <input type="submit" VALUE="Submit">
+        </form>
+    {% endif %}
+    <br>
+    <p>{{ allcomments.count }} Comments</p>
+    <br>
+    {% for comment in comments %}
+        <div class="card bg-dark text-white">
+            <p class="card-header"><a href="{% url 'accounts:user_profile' comment.user.id comment.user.username %}"
+                                      class="nav-link active" style="font-size: x-large">{{ comment.user }}</a>
+                {{ comment.created|timesince }} ago</p>
+            <p class="card-body">{{ comment.body }}</p>
+            {% for reply in comment.rcomments.all %}
+                <div class="bg-primary p-3 m-2">
+                <p class="card-header"><a href="{% url 'accounts:user_profile' reply.user.id reply.user.username %}"
+                                      class="nav-link active" style="font-size: large">{{ reply.user }}</a>
+                {{ reply.created|timesince }} ago</p>
+            <p class="card-body">{{ reply.body }}</p>
+                </div>
+            {% endfor %}
+        {% if request.user.is_authenticated %}
+        <form action="{% url 'posts:add_reply' post.id comment.id %}" method="post">
+                    {% csrf_token %}
+                    {{ replyform.as_p }}
+                    <input type="submit" value="Send">
+                </form>
+        {% endif %}
+        </div><br/>
+    {% endfor %}
+
+{% endblock %}
